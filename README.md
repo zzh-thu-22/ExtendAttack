@@ -30,6 +30,9 @@ To evaluate ExtendAttack, you should run the following codes.
     ```
 
 3. Evaluate
+
+    For BigCodeBench-Complete, Please refer to [bigcodebench](https://github.com/bigcode-project/bigcodebench).
+
     ```
     # for AIME2024
     python Matheval.py --model o3-mini --ratio 0.1 --dataset aime2024 --method ExtendAttack
