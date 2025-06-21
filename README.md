@@ -31,7 +31,7 @@ To evaluate ExtendAttack, you should run the following codes.
 
 3. Evaluate
 
-    For BigCodeBench-Complete, Please refer to [bigcodebench](https://github.com/bigcode-project/bigcodebench).
+    For BigCodeBench-Complete, please refer to [bigcodebench](https://github.com/bigcode-project/bigcodebench).
 
     ```
     # for AIME2024
