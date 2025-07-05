@@ -17,16 +17,16 @@ To evaluate ExtendAttack, you should run the following codes.
 2. Inference
     ```
     # for AIME2024
-    python Math.py --model o3-mini --ratio 0.1 --max-parallel 30 --n 1 --dataset aime2024 --method ExtendAttack
+    python src/Math.py --model o3-mini --ratio 0.1 --max-parallel 30 --n 1 --dataset aime2024 --method ExtendAttack
 
     # for AIME2025
-    python Math.py --model o3-mini --ratio 0.1 --max-parallel 30 --n 1 --dataset aime2025 --method ExtendAttack
+    python src/Math.py --model o3-mini --ratio 0.1 --max-parallel 30 --n 1 --dataset aime2025 --method ExtendAttack
 
     # for HumanEval
-    python humaneval.py --model o3-mini --ratio 0.1 --max-parallel 30 --n 1 --dataset humaneval --method ExtendAttack
+    python src/humaneval.py --model o3-mini --ratio 0.5 --max-parallel 30 --n 1 --dataset humaneval --method ExtendAttack
 
     # for BigcodeBench-Complete
-    python bigcodebench.py --model o3-mini --ratio 0.1 --max-parallel 30 --dataset bigcodebench --method ExtendAttack
+    python src/bigcodebench.py --model o3-mini --ratio 0.2 --max-parallel 30 --dataset bigcodebench --method ExtendAttack
     ```
 
 3. Evaluate
@@ -35,13 +35,13 @@ To evaluate ExtendAttack, you should run the following codes.
 
     ```
     # for AIME2024
-    python Matheval.py --model o3-mini --ratio 0.1 --dataset aime2024 --method ExtendAttack
+    python src/Matheval.py --model o3-mini --ratio 0.1 --n 1 --dataset aime2024 --method ExtendAttack
 
     # for AIME2025
-    python Matheval.py --model o3-mini --ratio 0.1 --dataset aime2025 --method ExtendAttack
+    python src/Matheval.py --model o3-mini --ratio 0.1 --n 1 --dataset aime2025 --method ExtendAttack
 
     # for HumanEval
-    python humanevaleval.py --model o3-mini --ratio 0.1 --dataset humaneval --method ExtendAttack
+    python src/humanevaleval.py --model o3-mini --ratio 0.5 --n 1 --dataset humaneval --method ExtendAttack
     ```
     
 

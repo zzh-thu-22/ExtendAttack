@@ -1,14 +1,15 @@
 import re
-from openai import OpenAI
 import json
-from concurrent.futures import ThreadPoolExecutor
+import time
 import random
 import os
 import argparse
+from openai import OpenAI
+from concurrent.futures import ThreadPoolExecutor
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', type=str, required=True, help='name of the model')
-parser.add_argument('--ratio', type=float, help="A float ratio")
+parser.add_argument('--model', type=str, help='name of the model')
+parser.add_argument('--ratio', type=float, default=0.0, help="A float ratio")
 parser.add_argument('--max-parallel', type=int, help='max parallel threads')
 parser.add_argument('--dataset', type=str, help='name of the dataset')
 parser.add_argument('--method', type=str, help='ExtendAttack, DA, overthinking')
@@ -36,6 +37,7 @@ def extract_after_think(text: str) -> str:
 
 def extract_code(text: str) -> str:
         matches = re.findall(r"```python\n(.*?)```", text, re.DOTALL)
+        completion_code = ""
       
         if not matches:
             return ""
@@ -173,11 +175,13 @@ def make_prompt(question, method):
     elif method == 'overthinking':
         return make_overthinking_prompt(question, target_context_templates[0])
 
-def Response(id, method, dataset, prompt, ratio, parent_dir):
+def Response(id, method, dataset, prompt, ratio, current_dir):
     openai = OpenAI(
         api_key=api_key,
-        base_url=f"",
+        base_url=""
     )
+
+    start_time = time.time()
    
     model_str = args.model
     chat_completion = openai.chat.completions.create(
@@ -186,19 +190,21 @@ def Response(id, method, dataset, prompt, ratio, parent_dir):
         timeout=1200
     )
 
+    end_time = time.time()
     content = chat_completion.choices[0].message.content
     solution = extract_after_think(content)
 
     result = {
         'task_id': id,
         'output_tokens': chat_completion.usage.completion_tokens,
+        'latency': end_time - start_time,
         'solution': extract_code(solution)
     }
 
     if method == 'ExtendAttack':
-        path = os.path.join(parent_dir, f'result/{dataset}/{model_str}/{method}/{ratio}/result.jsonl')
+        path = os.path.join(current_dir, f'result/{dataset}/{model_str}/{method}/{ratio}/result.jsonl')
     else:
-        path = os.path.join(parent_dir, f'result/{dataset}/{model_str}/{method}/result.jsonl')
+        path = os.path.join(current_dir, f'result/{dataset}/{model_str}/{method}/result.jsonl')
     os.makedirs(os.path.dirname(path), exist_ok=True)
     print(f'Writing to {path}')
 
@@ -210,9 +216,8 @@ def Response(id, method, dataset, prompt, ratio, parent_dir):
 
 if __name__ == "__main__":
     dataset = args.dataset
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    parent_dir = os.path.dirname(current_dir)
-    dataset_path = os.path.join(parent_dir, 'dataset', f'{dataset}.json')
+    current_dir = os.getcwd()
+    dataset_path = os.path.join(current_dir, 'dataset', f'{dataset}.json')
     with open(dataset_path, 'r') as f:
         data = json.load(f)
 
@@ -220,9 +225,9 @@ if __name__ == "__main__":
     for item in data:
         all_ids.append(item['task_id'])
     if args.method == 'ExtendAttack':
-        output_path = os.path.join(parent_dir, f'result/{dataset}/{args.model}/{args.method}/{args.ratio}/result.jsonl')
+        output_path = os.path.join(current_dir, f'result/{dataset}/{args.model}/{args.method}/{args.ratio}/result.jsonl')
     else:
-        output_path = os.path.join(parent_dir, f'result/{dataset}/{args.model}/{args.method}/result.jsonl')
+        output_path = os.path.join(current_dir, f'result/{dataset}/{args.model}/{args.method}/result.jsonl')
     if os.path.exists(output_path):
         unfinished_ids = extract_unfinish_ids(all_ids, output_path)
         data = [item for item in data if item['task_id'] in unfinished_ids]
@@ -237,4 +242,4 @@ if __name__ == "__main__":
             #print(prompt)
 
             futures = []
-            futures.append(executor.submit(Response, id, args.method, dataset, prompt, args.ratio, parent_dir))
+            futures.append(executor.submit(Response, id, args.method, dataset, prompt, args.ratio, current_dir))

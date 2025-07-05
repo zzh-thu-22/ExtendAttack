@@ -15,15 +15,16 @@ import re
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', type=str, required=True, help='name of the model')
-parser.add_argument('--ratio', type=float, help="A float ratio")
+parser.add_argument('--model', type=str, help='name of the model')
+parser.add_argument('--ratio', type=float, default=0.0, help="A float ratio")
 parser.add_argument('--dataset', type=str, help='name of the dataset')
+parser.add_argument('--n', type=int, help='number of completions to generate')
 parser.add_argument('--method', type=str, help='ExtendAttack, DA, overthinking')
 args = parser.parse_args()
 
 # ==========
 # data
-ROOT = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.getcwd()
 ROOT = os.path.dirname(ROOT)
 HUMAN_EVAL = os.path.join(ROOT,  "dataset", "HumanEval.jsonl.gz")
 
@@ -437,7 +438,7 @@ class HUMANEVALEvaluator(CodeEvaluator):
     def extract_code(self, text: str) -> str:
         # Use regex to find the content inside ```python\n...\n```
         matches = re.findall(r"```python\n(.*?)```", text, re.DOTALL)
-        # Return the last match if any matches exist
+        completion_code = ""
        
         if not matches:
             return ""
@@ -470,18 +471,17 @@ def init_evaluator():
 if __name__ == "__main__":
     init_evaluator()
 
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    parent_dir = os.path.dirname(current_dir)
+    current_dir = os.getcwd()
     ratio = args.ratio
     method = args.method
     dataset = args.dataset
     model_str = args.model
    
     if method == 'ExtendAttack':
-        path = os.path.join(parent_dir, f'result/{dataset}/{model_str}/{method}/{ratio}/result.jsonl')
+        path = os.path.join(current_dir, f'result/{dataset}/{model_str}/{method}/{ratio}/result.jsonl')
     else:
-        path = os.path.join(parent_dir, f'result/{dataset}/{model_str}/{method}/result.jsonl')
-    dataset_path = os.path.join(parent_dir, 'dataset', f'{dataset}.json')
+        path = os.path.join(current_dir, f'result/{dataset}/{model_str}/{method}/result.jsonl')
+    dataset_path = os.path.join(current_dir, 'dataset', f'{dataset}.json')
 
     with open(path, 'r') as f:
         result = []
@@ -490,6 +490,7 @@ if __name__ == "__main__":
             result.append(json_object)
     
     ouput_tokens = 0.0
+    latency = 0.0
     right = 0
     case_sum = 0
 
@@ -499,6 +500,7 @@ if __name__ == "__main__":
         text = result[i]
         id = text['task_id']
         ouput_tokens += text['output_tokens']
+        latency += text['latency']
        
         with open(dataset_path, 'r') as f:
             data = json.load(f)
@@ -513,13 +515,14 @@ if __name__ == "__main__":
                 "test": test
             }
         
-        case_sum += len(text) - 2
-        for j in range(len(text) - 2):
+        case_sum += args.n
+        for j in range(args.n):
             solution = text['completion_'+str(j)]
 
             pass_at_k, judge_info = evaluator_map["humaneval"].judge(question, solution, ground_truth, 1)
             right += pass_at_k
 
     print(f'right: {right}, case_sum: {case_sum}')
-    print(f"avg_output_tokens: {ouput_tokens / sum}")
+    print(f"avg_output_tokens: {ouput_tokens / case_sum}")
+    print(f"avg_latency': {latency / (case_sum / args.n)}")
     print(f'accuracy: {right / case_sum}')

@@ -6,9 +6,10 @@ import argparse
 import os
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model', type=str, required=True, help='name of the model')
-parser.add_argument('--ratio', type=float, help="A float ratio")
+parser.add_argument('--model', type=str, help='name of the model')
+parser.add_argument('--ratio', type=float, default=0.0, help="A float ratio")
 parser.add_argument('--dataset', type=str, help='name of the dataset')
+parser.add_argument('--n', type=int, help='number of completions to generate')
 parser.add_argument('--method', type=str, help='ExtendAttack, DA, overthinking')
 args = parser.parse_args()
 
@@ -78,6 +79,7 @@ if __name__ == '__main__':
             result.append(json_object)
 
     ouput_tokens = 0.0
+    latency = 0.0
     right = 0
     case_sum = 0
 
@@ -85,6 +87,7 @@ if __name__ == '__main__':
         text = result[i]
         id = text['task_id']
         ouput_tokens += text['output_tokens']
+        latency += text['latency']
 
         with open(dataset_path, 'r') as f:
             data = json.load(f)
@@ -92,8 +95,8 @@ if __name__ == '__main__':
                 if item['task_id'] == id:
                     ground_truth = item['answer']
 
-        case_sum += len(text) - 2
-        for j in range(len(text) - 2):
+        case_sum += args.n
+        for j in range(args.n):
             solution = text['completion_'+str(j)]
 
             if method == 'overthinking':
@@ -108,4 +111,5 @@ if __name__ == '__main__':
 
     print(f'right: {right}, case_sum: {case_sum}')
     print(f"avg_output_tokens: {ouput_tokens / case_sum}")
+    print(f"avg_latency': {latency / (case_sum / args.n)}")
     print(f'accuracy: {right / case_sum}')
