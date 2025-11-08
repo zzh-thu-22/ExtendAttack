@@ -1,7 +1,5 @@
 # ExtendAttack: Attacking Servers of LRMs via Extending Reasoning
 
-This is the official implementation of the paper: *ExtendAttack: Attacking Servers of LRMs via Extending Reasoning*.
-
 <p align="center">
   <img src="imgs/ExtendAttack.png" alt="ExtendAttack Overview" width="1000"/>
 </p>
