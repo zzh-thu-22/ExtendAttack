@@ -49,9 +49,9 @@ To evaluate ExtendAttack, you should run the following codes.
 If you find this repository helpful, please cite our paper.
 
 ```
-@article{zhu2025extendattackattackingserverslrms,
+@misc{zhu2025extendattackattackingserverslrms,
       title={ExtendAttack: Attacking Servers of LRMs via Extending Reasoning}, 
-      author={Zhenhao Zhu and Yue Liu and Yingwei Ma and Hongcheng Gao and Nuo Chen and Yanpei Guo and Wenjie Qu and Huiying Xu and Xinzhong Zhu and Jiaheng Zhang},
+      author={Zhenhao Zhu and Yue Liu and Zhiwei Xu and Yingwei Ma and Hongcheng Gao and Nuo Chen and Yanpei Guo and Wenjie Qu and Huiying Xu and Zifeng Kang and Xinzhong Zhu and Jiaheng Zhang},
       year={2025},
       eprint={2506.13737},
       archivePrefix={arXiv},
