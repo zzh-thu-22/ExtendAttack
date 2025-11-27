@@ -1,4 +1,5 @@
-# ExtendAttack: Attacking Servers of LRMs via Extending Reasoning
+<div align="center">
+<h2><a href="https://arxiv.org/abs/2506.13737">ExtendAttack: Attacking Servers of LRMs via Extending Reasoning</a></h2>
 
 <p align="center">
   <img src="imgs/ExtendAttack.png" alt="ExtendAttack Overview" width="1000"/>
