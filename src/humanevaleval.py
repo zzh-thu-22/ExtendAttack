@@ -13,6 +13,7 @@ import os
 import sys
 import re
 import argparse
+from contextlib import nullcontext
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model', type=str, help='name of the model')
@@ -24,8 +25,7 @@ args = parser.parse_args()
 
 # ==========
 # data
-ROOT = os.getcwd()
-ROOT = os.path.dirname(ROOT)
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HUMAN_EVAL = os.path.join(ROOT,  "dataset", "HumanEval.jsonl.gz")
 
 
@@ -171,6 +171,11 @@ def check_correctness(
 
 @contextlib.contextmanager
 def time_limit(seconds: float):
+    if not hasattr(signal, "SIGALRM") or not hasattr(signal, "setitimer"):
+        with nullcontext():
+            yield
+        return
+
     def signal_handler(signum, frame):
         raise TimeoutException("Timed out!")
 
@@ -517,7 +522,7 @@ if __name__ == "__main__":
         
         case_sum += args.n
         for j in range(args.n):
-            solution = text['completion_'+str(j)]
+            solution = text.get('completion_'+str(j), text.get('solution', ''))
 
             pass_at_k, judge_info = evaluator_map["humaneval"].judge(question, solution, ground_truth, 1)
             right += pass_at_k

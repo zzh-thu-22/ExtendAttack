@@ -14,6 +14,8 @@ parser.add_argument('--method', type=str, help='ExtendAttack, DA, overthinking')
 args = parser.parse_args()
 
 api_key = os.environ["API_KEY"] 
+api_base_url = os.environ.get("API_BASE_URL") or os.environ.get("OPENAI_BASE_URL")
+judge_model = os.environ.get("JUDGE_MODEL", "gpt-4o-mini")
 
 class MathEvaluator:
     def extract_after_think(self, text: str) -> str:
@@ -44,11 +46,12 @@ evaluator_map = {
 }
 
 def Response(prompt):
-    openai = OpenAI(
-        api_key=api_key,
-    )
+    client_kwargs = {"api_key": api_key}
+    if api_base_url:
+        client_kwargs["base_url"] = api_base_url
+    openai = OpenAI(**client_kwargs)
    
-    model_str = "gpt-4o-mini"
+    model_str = judge_model
     chat_completion = openai.chat.completions.create(
         model=model_str,
         messages=[{"role": "user", "content": prompt}],
@@ -97,7 +100,7 @@ if __name__ == '__main__':
 
         case_sum += args.n
         for j in range(args.n):
-            solution = text['completion_'+str(j)]
+            solution = text.get('completion_'+str(j), '')
 
             if method == 'overthinking':
                 solution = solution.replace('\text{false}', '').replace('\text{true}', '')
